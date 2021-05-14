@@ -38,7 +38,8 @@ class modbus_handler
 public:
     modbus_handler();
     ~modbus_handler();
-    int modbus_init();
+    int modbus_handler_init();
+    int modbus_handler_connect();
     int modbus_data_process();
     int modbus_start();
 
@@ -48,8 +49,9 @@ private:
     std::vector<BackendParams*> m_backendvec;
     int m_timeout_ms;
     std::vector<int> m_slaveAddrvec;
-    std::vector<int> m_fTypevec;
+    std::vector<FuncType> m_fTypevec;
     db_helper *m_dbhelper;
+    std::vector<bool> m_bConnected;
 };
 
 #endif
