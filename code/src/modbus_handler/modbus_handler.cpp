@@ -105,9 +105,9 @@ int modbus_handler::modbus_data_process()
     m_dbhelper->sql_exec_multicol_return(sqlcmd);
     for (int i = 0; i < m_dbhelper->getsqlresult().size(); i++)
     {
-        m_fTypevec.push_back(stoi(m_dbhelper->getsqlresult()[i]));
+        m_fTypevec.push_back((FuncType)stoi(m_dbhelper->getsqlresult()[i]));
     }
-    string sqlcmd = "select param2 from port where protocol=0;";
+    sqlcmd = "select param2 from port where protocol=0;";
     m_dbhelper->sql_exec_multicol_return(sqlcmd);
     vector<string> param2vec = m_dbhelper->getsqlresult();
     // 先考虑一个
@@ -155,7 +155,7 @@ int modbus_handler::modbus_data_process()
         // exit(EXIT_FAILURE);
     }
     modbus_t *ctx = m_backendvec[0]->createCtxt(m_backendvec[0]);
-    int readWriteNo = stoi(param2vec[i]);
+    int readWriteNo = stoi(param2vec[0]);
     while(m_bConnected[0])
     {
         switch (m_fTypevec[0]) {

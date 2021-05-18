@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#define DB_FILE_PATH "./iot.s3db"
+#define DB_FILE_PATH "./iot.db"
 
 typedef int (*callback)(void*,int,char**,char**);
 
