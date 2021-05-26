@@ -1,0 +1,7 @@
+CJSON = cJSON.o
+
+CJSON_DIR = $(COMM_DIR)/cjson
+
+CC_INCLUDE += -I$(CJSON_DIR)
+VPATH += $(CJSON_DIR)
+

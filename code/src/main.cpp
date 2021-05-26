@@ -4,5 +4,8 @@
 
 int main(int argc, char **argv)
 {
+    modbus_handler *modbushandler = new modbus_handler();
+    modbushandler->modbus_handler_init();
     printf("start\n");
+    modbushandler->modbus_start();
 }

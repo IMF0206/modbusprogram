@@ -8,6 +8,9 @@
 #include "mbu-common.h"
 #include <vector>
 
+class mqtt_pub;
+class mqtt_plat;
+
 typedef enum {
     FuncNone =          -1,
 
@@ -44,6 +47,7 @@ public:
     int modbus_start();
 
 private:
+    int modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int startaddr, uint16_t *dest);
     std::vector<Data> m_datavec;
     std::vector<WriteDataType> m_wdatetypevec;
     std::vector<BackendParams*> m_backendvec;
@@ -52,6 +56,9 @@ private:
     std::vector<FuncType> m_fTypevec;
     db_helper *m_dbhelper;
     std::vector<bool> m_bConnected;
+    std::vector<modbus_t*> m_mb_vec;
+    mqtt_pub *m_mqttpub;
+    mqtt_plat *m_mqttplat;
 };
 
 #endif
