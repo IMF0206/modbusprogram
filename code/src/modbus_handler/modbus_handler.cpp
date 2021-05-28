@@ -336,7 +336,25 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
     }
     string sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
     m_dbhelper->sql_exec_with_return(sql);
-    int offset = stoi(m_dbhelper->getsqlresult);
-    int ret = modbus_read_input_registers(ctx, sqlresid, offset, dest);
-    if ()
+    int offset = stoi(m_dbhelper->getsqlresult()[0]);
+    int ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
+    if (ret != offset)
+    {
+        printf("read number not right\n");
+        return -1;
+    }
+    startaddr += offset;
+
+    string sql = "select param3 from port where protocol=0";
+    m_dbhelper->sql_exec_multicol_return(sql);
+    if (m_dbhelper->getsqlresult().size() <= sqlresid)
+    {
+        printf("sqlresid is over result size\n");
+        return startaddr;
+    }
+    if (m_dbhelper->getsqlresult()[sqlresid].empty())
+    {
+        printf("param2 is empty\n");
+        return 0;
+    }
 }
