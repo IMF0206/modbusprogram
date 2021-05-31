@@ -7,6 +7,7 @@
 
 #include "mbu-common.h"
 #include <vector>
+#include <map>
 
 class mqtt_pub;
 class mqtt_plat;
@@ -59,6 +60,7 @@ private:
     std::vector<modbus_t*> m_mb_vec;
     mqtt_pub *m_mqttpub;
     mqtt_plat *m_mqttplat;
+    std::map<string, float> m_data_map;
 };
 
 #endif

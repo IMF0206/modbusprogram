@@ -477,6 +477,42 @@ void mqtt_json::create_json_event_upload(frame_info* Frame_info)
     return;
 }
 
+void mqtt_json::create_json_data_upload_map(std::map<std::string ,float>datamap)
+{
+        cJSON *root=NULL;
+    root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "mid", g_mid_num);
+    cJSON_AddStringToObject(root, "type", "CMD_REPORTDATA");
+    cJSON_AddNumberToObject(root, "timestamp", get_stamp_time());
+    cJSON_AddNumberToObject(root, "expire", -1);
+
+    cJSON *param = cJSON_CreateObject();
+    cJSON *data = cJSON_CreateObject();
+
+    // TODO cmd用啥？
+    cJSON_AddStringToObject(param, "cmd", "modbus_info");
+    cJSON_AddStringToObject(param, "deviceId", "1100001000170006");
+    cJSON_AddStringToObject(root, "deviceId", "1100001000170006");
+
+    std::map<std::string, float>::iterator iter;
+    for (iter = datamap.begin(); iter != datamap.end(); iter++)
+    {
+        cJSON_AddNumberToObject(data, iter->first.c_str(), iter->second);
+    }
+
+    cJSON_AddStringToObject(data, "collectTime", get_current_time().c_str());
+    cJSON_AddStringToObject(data, "devicename", "NARI_WULIAN");
+
+    cJSON_AddItemToObject(param, "data", data);
+    cJSON_AddItemToObject(root, "param", param);
+    m_jsonstr = cJSON_Print(root);
+    
+    printf("jsonstr is : %s\n", m_jsonstr.c_str());
+
+    cJSON_Delete(root);
+    return;
+}
+
 void mqtt_json::create_json_sysinfo_upload(float usercpu, float syscpu, float mem)
 {
     cJSON *root=NULL;

@@ -224,7 +224,8 @@ int modbus_handler::modbus_data_process()
                 break;
             case(ReadHoldingRegisters):
                 printf("ReadHoldingRegisters\n");
-                ret = modbus_read_registers(ctx, startAddr, readWriteNo, m_datavec[0].data16);
+                // ret = modbus_read_registers(ctx, startAddr, readWriteNo, m_datavec[0].data16);
+                ret = modbus_read_holdingdata(ctx, 0, startAddr + 1, m_datavec[0].data16);
                 break;
             case(ReadInputRegisters):
                 printf("ReadInputRegisters\n");
@@ -343,6 +344,8 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
         printf("read number not right\n");
         return -1;
     }
+    float result = modbus_get_float(dest);
+    m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
     startaddr += offset;
 
     string sql = "select param3 from port where protocol=0";
@@ -354,7 +357,45 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
     }
     if (m_dbhelper->getsqlresult()[sqlresid].empty())
     {
-        printf("param2 is empty\n");
+        printf("param3 is empty\n");
         return 0;
     }
+    sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
+    m_dbhelper->sql_exec_with_return(sql);
+    offset = stoi(m_dbhelper->getsqlresult()[0]);
+    ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
+    if (ret != offset)
+    {
+        printf("read number not right\n");
+        return -1;
+    }
+    result = modbus_get_float(dest);
+    m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
+    startaddr += offset;
+
+    string sql = "select param4 from port where protocol=0";
+    m_dbhelper->sql_exec_multicol_return(sql);
+    if (m_dbhelper->getsqlresult().size() <= sqlresid)
+    {
+        printf("sqlresid is over result size\n");
+        return startaddr;
+    }
+    if (m_dbhelper->getsqlresult()[sqlresid].empty())
+    {
+        printf("param4 is empty\n");
+        return 0;
+    }
+    sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
+    m_dbhelper->sql_exec_with_return(sql);
+    offset = stoi(m_dbhelper->getsqlresult()[0]);
+    ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
+    if (ret != offset)
+    {
+        printf("read number not right\n");
+        return -1;
+    }
+    result = modbus_get_float(dest);
+    m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
+    startaddr += offset;
+    return startaddr;
 }
