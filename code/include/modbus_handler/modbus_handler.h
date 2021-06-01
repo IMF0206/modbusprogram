@@ -4,6 +4,7 @@
 #include "modbus.h"
 #include "errno.h"
 #include "sqlite_helper.h"
+#include "modbus2mqtt.h"
 
 #include "mbu-common.h"
 #include <vector>
@@ -61,6 +62,7 @@ private:
     mqtt_pub *m_mqttpub;
     mqtt_plat *m_mqttplat;
     std::map<string, float> m_data_map;
+    modbus2mqtt m_mdb2mqtt;
 };
 
 #endif

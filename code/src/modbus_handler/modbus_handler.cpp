@@ -4,6 +4,15 @@
 #include "mqtt_pub.h"
 #include "mqtt_plat.h"
 
+#define ADDRESS     "tcp://172.16.20.40:1883"
+#define CLIENTID    "ExampleClientPub"
+#define TOPIC       "topictests/aaa/bbb"
+#define PAYLOAD     "Hello man, can you see me?"
+#define QOS         1
+#define TIMEOUT     10000L
+#define EVENT 1
+#define DATA 2
+
 using namespace std;
 
 modbus_handler::modbus_handler()
@@ -211,6 +220,7 @@ int modbus_handler::modbus_data_process()
     bool isWriteFunction = false;
     while(1)
     {
+        m_data_map.clear();
         if (m_bConnected[0] && ctx != NULL)
         {
             switch (m_fTypevec[0]) {
@@ -282,6 +292,16 @@ int modbus_handler::modbus_data_process()
         {
             modbus_t *ctx = m_mb_vec[0];
         }
+        sqlcmd = "select id from port where protocol=0;";
+        m_dbhelper->sql_exec_multicol_return(sqlcmd);
+        if (!m_data_map.empty())
+        {
+            printf("error:m_data_map is empty\n");
+            continue;
+        }
+        string jsonstr = m_mdb2mqtt.getmqttstr(m_dbhelper->getsqlresult()[0], m_data_map);
+        printf("mqtt json is : %s\n", jsonstr.c_str());
+        m_mqttpub->mqtt_send(jsonstr, DATA);
         sleep(5);
     }
     
@@ -397,5 +417,6 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
     result = modbus_get_float(dest);
     m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
     startaddr += offset;
+
     return startaddr;
 }

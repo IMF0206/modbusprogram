@@ -3,6 +3,7 @@
 
 #include "sqlite_helper.h"
 #include <map>
+#include <string>
 
 // 定义对应的mid值
 #define PLAT_ADD_DEV 7
@@ -48,7 +49,7 @@ public:
     void create_json_updatestatus_device(int status);
     void create_json_updatestatus_ipc(int status);
     void create_json_data_upload(frame_info* Frame_info);
-    void create_json_data_upload_map(std::map<std::string ,float>datamap);
+    void create_json_data_upload_map(std::string deviceid, std::map<std::string ,float>datamap);
     void create_json_sysinfo_upload(float usercpu, float syscpu, float mem);
     void create_json_event_upload(frame_info* Frame_info);
     void parse_json_device_response(char* msg);

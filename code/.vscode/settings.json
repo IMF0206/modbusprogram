@@ -28,6 +28,10 @@
         "type_traits": "cpp",
         "utility": "cpp",
         "typeinfo": "cpp",
-        "*.cpp_bak": "cpp"
+        "*.cpp_bak": "cpp",
+        "cmath": "cpp",
+        "deque": "cpp",
+        "numeric": "cpp",
+        "cinttypes": "cpp"
     }
 }
