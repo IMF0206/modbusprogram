@@ -9,6 +9,7 @@ else
 ifeq ($(TARGET_PLATFORM), x86)
 LDFLAGS += -L$(PROJECTROOT)/lib/x86 -lmodbus
 LDFLAGS += -L$(PROJECTROOT)/lib/x86 -lsqlite3
+LDFLAGS += -lcrypto -lssl
 CC = gcc
 CXX = g++
 AR = ar
@@ -19,22 +20,30 @@ endif
 
 CFLAGS += -I$(PROJECTROOT)/code/include/libmodbus/
 CFLAGS += -I$(PROJECTROOT)/code/include/modbus_handler
+CFLAGS += -I$(PROJECTROOT)/code/include/cjson
 CFLAGS += -I$(PROJECTROOT)/code/include/sqlite
 CFLAGS += -I$(PROJECTROOT)/code/include/sqlite_helper
+CFLAGS += -I$(PROJECTROOT)/code/include/mqtt_helper
+CFLAGS += -I$(PROJECTROOT)/code/include/paho
+CFLAGS += -I$(PROJECTROOT)/code/include/common
 CFLAGS += -I$(PROJECTROOT)/code/include/
 CXXFLAGS += -I$(PROJECTROOT)/code/include/libmodbus/
 CXXFLAGS += -I$(PROJECTROOT)/code/include/modbus_handler
 CXXFLAGS += -I$(PROJECTROOT)/code/include/sqlite
+CXXFLAGS += -I$(PROJECTROOT)/code/include/cjson
 CXXFLAGS += -I$(PROJECTROOT)/code/include/sqlite_helper
+CXXFLAGS += -I$(PROJECTROOT)/code/include/mqtt_helper
+CXXFLAGS += -I$(PROJECTROOT)/code/include/paho
+CXXFLAGS += -I$(PROJECTROOT)/code/include/common
 CXXFLAGS += -I$(PROJECTROOT)/code/include/
 #CFLAGS += -I../socketmsg/
 CFLAGS += -g -fPIC -o2 -std=c11
 CXXFLAGS += -g -fPIC -o2 -std=c++11
-#LDFLAGS += -L./ -levent -levent_core -levent_extra -levent_openssl -levent_pthreads -lsqlite3 -lpthread -lpaho-mqtt3a -lpaho-mqtt3as #-lpaho-mqtt3c
+LDFLAGS += -L$(PROJECTROOT)/lib/$(TARGET_PLATFORM) -lpaho-mqtt3a -lpaho-mqtt3as -lpaho-mqtt3c -lpaho-mqtt3cs
 $(warning  $(LDFLAGS))
 #AR = arm-linux-gnueabihf-ar
 
-SRCS=$(wildcard $(PROJECTROOT)/code/src/modbus_handler/*.cpp $(PROJECTROOT)/code/src/modbus_handler/*.c $(PROJECTROOT)/code/src/sqlite_helper/*.cpp $(PROJECTROOT)/code/src/sqlite_helper/*.c $(PROJECTROOT)/code/src/*.c $(PROJECTROOT)/code/src/*.cpp)
+SRCS=$(wildcard $(PROJECTROOT)/code/src/modbus_handler/*.cpp $(PROJECTROOT)/code/src/modbus_handler/*.c $(PROJECTROOT)/code/src/sqlite_helper/*.cpp $(PROJECTROOT)/code/src/sqlite_helper/*.c $(PROJECTROOT)/code/src/*.c $(PROJECTROOT)/code/src/cjson/*.c $(PROJECTROOT)/code/src/*.cpp $(PROJECTROOT)/code/src/mqtt_helper/*.cpp  $(PROJECTROOT)/code/src/common/*.cpp)
 OBJS=$(patsubst %.cpp, %.o, $(SRCS))
 #OBJS1 = server.o \
 
@@ -54,6 +63,6 @@ $(TARGET): $(OBJS)
 
 	
 .c.cpp.o:
-	$(CXX) -c $(CXXFLAGS) $^ -o $@ 
+	$(CXX) -c $(CXXFLAGS) $^ -o $@
 clean:
 	$(RM) $(TARGET) $(OBJS)#$(OBJS1) $(OBJS2)

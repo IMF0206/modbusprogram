@@ -7,7 +7,7 @@
 
 class mqtt_json;
 class mqtt_plat;
-class sqlite_helper;
+class db_helper;
 
 class modbus2mqtt
 {

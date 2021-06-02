@@ -149,7 +149,11 @@ int modbus_handler::modbus_data_process()
     vector<string> param2vec = m_dbhelper->getsqlresult();
     // 先考虑一个
     // TODO
-
+    if (m_fTypevec.empty())
+    {
+        printf("error, m_fTypevc is empty\n");
+        return -1;
+    }
     FuncType fType = (FuncType)m_fTypevec[0];
     printf("fType:[%d]\n", fType);
     if (m_wdatetypevec.empty())
@@ -355,7 +359,7 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
         printf("param2 is empty\n");
         return 0;
     }
-    string sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
+    sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
     m_dbhelper->sql_exec_with_return(sql);
     int offset = stoi(m_dbhelper->getsqlresult()[0]);
     int ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
@@ -368,7 +372,7 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
     m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
     startaddr += offset;
 
-    string sql = "select param3 from port where protocol=0";
+    sql = "select param3 from port where protocol=0";
     m_dbhelper->sql_exec_multicol_return(sql);
     if (m_dbhelper->getsqlresult().size() <= sqlresid)
     {
@@ -393,7 +397,7 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
     m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
     startaddr += offset;
 
-    string sql = "select param4 from port where protocol=0";
+    sql = "select param4 from port where protocol=0";
     m_dbhelper->sql_exec_multicol_return(sql);
     if (m_dbhelper->getsqlresult().size() <= sqlresid)
     {

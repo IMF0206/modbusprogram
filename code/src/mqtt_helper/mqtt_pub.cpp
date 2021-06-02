@@ -43,11 +43,16 @@ int ssl_error_cb(const char *str, size_t len, void *u)
 
 int mqtt_pub::mqtt_send(std::string jsonstr, int type)
 {
-    m_dbhelper->sql_exec_with_return("select deviceid from edgedev;");
+    m_dbhelper->sql_exec_with_return("select edgeid from edgedev;");
     // std::string cmd = "mosquitto_pub -t /v1/" + m_dbhelper->getsqlresult()[0] + "/topo/request -m " + jsonstr;
     // printf("cmd:%s\n", cmd.c_str());
     // system(cmd.c_str());
     std::string topicstr = "";
+    if (m_dbhelper->getsqlresult().empty())
+    {
+        printf("edgedev edgeid is empty\n");
+        return -1;
+    }
     std::string deviceidstr = m_dbhelper->getsqlresult()[0];
     if (deviceidstr.empty())
     {

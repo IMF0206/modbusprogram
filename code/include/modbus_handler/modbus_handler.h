@@ -61,7 +61,7 @@ private:
     std::vector<modbus_t*> m_mb_vec;
     mqtt_pub *m_mqttpub;
     mqtt_plat *m_mqttplat;
-    std::map<string, float> m_data_map;
+    std::map<std::string, float> m_data_map;
     modbus2mqtt m_mdb2mqtt;
 };
 
