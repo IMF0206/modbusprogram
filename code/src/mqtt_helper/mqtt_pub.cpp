@@ -82,9 +82,10 @@ int mqtt_pub::mqtt_send(std::string jsonstr, int type)
     m_dbhelper->sql_exec_with_return("select mqport from edgedev;");
     std::string mqportstr = m_dbhelper->getsqlresult()[0];
     // 判断是否需要进行加密
-    m_dbhelper->sql_exec_with_return("select secmode from edgedev;");
-    std::string secmode = m_dbhelper->getsqlresult()[0];
+    // m_dbhelper->sql_exec_with_return("select secmode from edgedev;");
+    // std::string secmode = m_dbhelper->getsqlresult()[0];
     char mqttaddr[128] = {0};
+    std::string secmode = "1";
     if (secmode.compare("1") == 0)
     {
         if (deviceip.size() == 0)
@@ -116,7 +117,8 @@ int mqtt_pub::mqtt_send(std::string jsonstr, int type)
         MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS)
     {
          printf("%s, %d:Failed to create client, return code %d\n", __FILE__, __LINE__, rc);
-         exit(EXIT_FAILURE);
+        //  exit(EXIT_FAILURE);
+        return -1;
     }
 
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
@@ -145,7 +147,7 @@ int mqtt_pub::mqtt_send(std::string jsonstr, int type)
     {
         printf("Failed to connect, return code %d\n", rc);
         return -1;
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
     std::replace(jsonstr.begin(), jsonstr.end(), '\t', ' ');
     pubmsg.payload = (void*)(jsonstr.c_str());
@@ -155,7 +157,8 @@ int mqtt_pub::mqtt_send(std::string jsonstr, int type)
     if ((rc = MQTTClient_publishMessage(client, topicstr.c_str(), &pubmsg, &token)) != MQTTCLIENT_SUCCESS)
     {
          printf("Failed to publish message, return code %d\n", rc);
-         exit(EXIT_FAILURE);
+        //  exit(EXIT_FAILURE);
+         return -1;
     }
 
     printf("Waiting for up to %d seconds for publication of %s\n"
