@@ -388,7 +388,7 @@ int main()
     mqtt_plat mqttplat;
     mqttplat.mqtt_plat_sub_init();
     modbus_handler *modbushandler = new modbus_handler();
-    modbushandler->modbus_handler_init();
+    // modbushandler->modbus_handler_init();
     printf("start\n");
     modbushandler->modbus_start();
     // mqttSub.mqtt_init();

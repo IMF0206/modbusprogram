@@ -30,7 +30,7 @@ std::string modbus2mqtt::getmqttstr(string portid, map<string, float>datamap)
     m_dbhelper->sql_exec_with_return(sql);
     if (m_dbhelper->getsqlresult().empty())
     {
-        printf("%s\n", sql);
+        printf("%s\n", sql.c_str());
         printf("No deviceid get in the table\n");
         return "{}";
     }

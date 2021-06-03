@@ -77,7 +77,12 @@ int mqtt_plat::mqtt_platconnect()
     // 获取gatewayId
     m_gatewayId = m_dbhelper->getsqlresult()[6];
     // 获取device
-    m_dbhelper->sql_exec_with_return("select deviceid from edgedev;");
+    m_dbhelper->sql_exec_with_return("select edgeid from edgedev;");
+    if (m_dbhelper->getsqlresult().empty())
+    {
+        printf("error:edgedev is empty\n");
+        return -1;
+    }
     string deviceid = m_dbhelper->getsqlresult()[0];
     string timestamp = get_timestamp();
     // 拼接登录的clientid
@@ -97,7 +102,15 @@ int mqtt_plat::mqtt_platdisconnect()
 
 int mqtt_plat::mqtt_platadddev()
 {
+    printf("line: %d\n", __LINE__);
+    m_gatewayId = "";
+    printf("m_gatewayId : %s\n", m_gatewayId.c_str());
+    if (m_gatewayId.empty())
+    {
+        m_gatewayId = "test";
+    }
     string topic = "/v1/devices/" + m_gatewayId + "/topo/add";
+
     m_json->create_json_plat_adddev();
     string addstr = m_json->get_json4plat();
     m_myclient->mqtt_client_publish((char*)topic.c_str(), QOS, (char*)addstr.c_str(), addstr.size());

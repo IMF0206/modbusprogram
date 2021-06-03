@@ -1,10 +1,14 @@
 LDFLAGS += -lm -lpthread -lgcc_s 
 $(warning  $(TARGET_PLATFORM))
 PROJECTROOT := ${shell pwd}/../..
-ifeq ($(TARGET_PLATFORM), imx6ull)
-LDFLAGS += -L$(PROJECTROOT)/lib/IMX6ULL/libevent -levent
-LDFLAGS += -L$(PROJECTROOT)/lib/IMX6ULL/sqlite -lsqlite3
-LDFLAGS += -L$(PROJECTROOT)/lib/IMX6ULL/openssl -lcrypto -lssl
+ifeq ($(TARGET_PLATFORM), arm-linux-gnueabihf)
+LDFLAGS += -L$(PROJECTROOT)/lib/arm-linux-gnueabihf/ -lmodbus
+LDFLAGS += -L$(PROJECTROOT)/lib/arm-linux-gnueabihf/ -lsqlite3
+LDFLAGS += -L$(PROJECTROOT)/lib/arm-linux-gnueabihf/ -lcrypto -lssl
+CC = arm-linux-gnueabihf-gcc
+CXX = arm-linux-gnueabihf-g++
+AR = arm-linux-gnueabihf-ar
+#LD = arm-linux-gnueabihf-ld
 else
 ifeq ($(TARGET_PLATFORM), x86)
 LDFLAGS += -L$(PROJECTROOT)/lib/x86 -lmodbus
@@ -13,9 +17,9 @@ LDFLAGS += -lcrypto -lssl
 CC = gcc
 CXX = g++
 AR = ar
+LD = ld
 endif
 endif
-
 
 
 CFLAGS += -I$(PROJECTROOT)/code/include/libmodbus/
@@ -39,11 +43,12 @@ CXXFLAGS += -I$(PROJECTROOT)/code/include/
 #CFLAGS += -I../socketmsg/
 CFLAGS += -g -fPIC -o2 -std=c11
 CXXFLAGS += -g -fPIC -o2 -std=c++11
-LDFLAGS += -L$(PROJECTROOT)/lib/$(TARGET_PLATFORM) -lpaho-mqtt3a -lpaho-mqtt3as -lpaho-mqtt3c -lpaho-mqtt3cs
+LDFLAGS += -L$(PROJECTROOT)/lib/$(TARGET_PLATFORM) -lpaho-mqtt3a -lpaho-mqtt3as -lpaho-mqtt3c -lpaho-mqtt3cs -lstdc++
 $(warning  $(LDFLAGS))
 #AR = arm-linux-gnueabihf-ar
 
-SRCS=$(wildcard $(PROJECTROOT)/code/src/modbus_handler/*.cpp $(PROJECTROOT)/code/src/modbus_handler/*.c $(PROJECTROOT)/code/src/sqlite_helper/*.cpp $(PROJECTROOT)/code/src/sqlite_helper/*.c $(PROJECTROOT)/code/src/*.c $(PROJECTROOT)/code/src/cjson/*.c $(PROJECTROOT)/code/src/*.cpp $(PROJECTROOT)/code/src/mqtt_helper/*.cpp  $(PROJECTROOT)/code/src/common/*.cpp)
+SRCS=$(wildcard $(PROJECTROOT)/code/src/modbus_handler/*.cpp $(PROJECTROOT)/code/src/modbus_handler/*.c $(PROJECTROOT)/code/src/sqlite_helper/*.cpp $(PROJECTROOT)/code/src/sqlite_helper/*.c $(PROJECTROOT)/code/src/*.c $(PROJECTROOT)/code/src/cjson/*.c $(PROJECTROOT)/code/src/*.cpp $(PROJECTROOT)/code/src/mqtt_helper/*.cpp $(PROJECTROOT)/code/src/common/*.cpp)
+
 OBJS=$(patsubst %.cpp, %.o, $(SRCS))
 #OBJS1 = server.o \
 

@@ -33,6 +33,7 @@
         "deque": "cpp",
         "numeric": "cpp",
         "cinttypes": "cpp",
-        "cjson.h": "c"
+        "cjson.h": "c",
+        "iostream": "cpp"
     }
 }

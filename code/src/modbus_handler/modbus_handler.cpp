@@ -19,7 +19,7 @@ modbus_handler::modbus_handler()
 {
     m_dbhelper = new db_helper("./iot.db");
     m_mqttpub = new mqtt_pub();
-    m_mqttpub = new mqtt_pub();
+    m_mqttplat = new mqtt_plat();
 }
 
 modbus_handler::~modbus_handler()
@@ -34,7 +34,7 @@ modbus_handler::~modbus_handler()
         delete m_mqttpub;
         m_mqttpub = NULL;
     }
-    if (m_mqttpub != NULL)
+    if (m_mqttplat != NULL)
     {
         delete m_mqttplat;
         m_mqttplat = NULL;
@@ -44,57 +44,62 @@ modbus_handler::~modbus_handler()
 
 int modbus_handler::modbus_handler_init()
 {
-    string sqlcmd = "select comtype from port where protocol=0;";
-    m_dbhelper->sql_exec_multicol_return(sqlcmd);
-    vector<string> comtypevec = m_dbhelper->getsqlresult();
-    sqlcmd = "select name from port where protocol=0;";
-    m_dbhelper->sql_exec_multicol_return(sqlcmd);
-    // 为modbus-RTU时需要知道name代表的串口号
-    vector<string> namevec = m_dbhelper->getsqlresult();
-    sqlcmd = "select ipaddr from port where protocol=0;";
-    m_dbhelper->sql_exec_multicol_return(sqlcmd);
-    vector<string> ipaddrvec = m_dbhelper->getsqlresult();
-    sqlcmd = "select port from port where protocol=0;";
-    m_dbhelper->sql_exec_multicol_return(sqlcmd);
-    vector<string> portvec = m_dbhelper->getsqlresult();
-    sqlcmd = "select id from port where protocol=0;";
-    m_dbhelper->sql_exec_multicol_return(sqlcmd);
-    vector<string> idvec = m_dbhelper->getsqlresult();
-
-    for (int i = 0; i < comtypevec.size(); i++)
+    while(1)
     {
-        m_mb_vec.push_back(NULL);
-        m_bConnected.push_back(false);
+        string sqlcmd = "select comtype from port where protocol=0;";
+        m_dbhelper->sql_exec_multicol_return(sqlcmd);
+        vector<string> comtypevec = m_dbhelper->getsqlresult();
+        sqlcmd = "select name from port where protocol=0;";
+        m_dbhelper->sql_exec_multicol_return(sqlcmd);
+        // 为modbus-RTU时需要知道name代表的串口号
+        vector<string> namevec = m_dbhelper->getsqlresult();
+        sqlcmd = "select ipaddr from port where protocol=0;";
+        m_dbhelper->sql_exec_multicol_return(sqlcmd);
+        vector<string> ipaddrvec = m_dbhelper->getsqlresult();
+        sqlcmd = "select port from port where protocol=0;";
+        m_dbhelper->sql_exec_multicol_return(sqlcmd);
+        vector<string> portvec = m_dbhelper->getsqlresult();
+        sqlcmd = "select id from port where protocol=0;";
+        m_dbhelper->sql_exec_multicol_return(sqlcmd);
+        vector<string> idvec = m_dbhelper->getsqlresult();
 
-        // 用的串口，默认是RTU
-        if (comtypevec[i].compare("0") == 0)
+        for (int i = 0; i < comtypevec.size(); i++)
         {
-            sqlcmd = "select baudrate from port where id=%s" + idvec[i] + ";";
-            m_dbhelper->sql_exec_with_return(sqlcmd);
-            BackendParams *ibackend = createRtuBackend(stoi(m_dbhelper->getsqlresult()[0]), 8, 1, 'E');
-            m_backendvec.push_back(ibackend);
-        }
-        else if (comtypevec[i].compare("1") == 0)
-        {
-            printf("=============%d\n", __LINE__);
-            BackendParams *ibackend = createTcpBackend(ipaddrvec[i].c_str(), stoi(portvec[i]));
-            m_backendvec.push_back(ibackend);
-        }
+            m_mb_vec.push_back(NULL);
+            m_bConnected.push_back(false);
 
-        if (NULL != m_backendvec[i])
-        {
-            if (Rtu == m_backendvec[i]->type)
+            // 用的串口，默认是RTU
+            if (comtypevec[i].compare("0") == 0)
             {
-                RtuBackend *rtuP = (RtuBackend*)m_backendvec[i];
-                strcpy(rtuP->devName, namevec[i].c_str());
-                modbus_t *ctx = m_backendvec[i]->createCtxt(m_backendvec[i]);
+                sqlcmd = "select baudrate from port where id=%s" + idvec[i] + ";";
+                m_dbhelper->sql_exec_with_return(sqlcmd);
+                BackendParams *ibackend = createRtuBackend(stoi(m_dbhelper->getsqlresult()[0]), 8, 1, 'E');
+                m_backendvec.push_back(ibackend);
             }
-            else if (Tcp == m_backendvec[i]->type) {
-                TcpBackend *tcpP = (TcpBackend*)m_backendvec[i];
-                strcpy(tcpP->ip, ipaddrvec[i].c_str());
+            else if (comtypevec[i].compare("1") == 0)
+            {
+                printf("=============%d, ip:%s, port:%s\n", __LINE__, ipaddrvec[i].c_str(), portvec[i].c_str());
+                BackendParams *ibackend = createTcpBackend(ipaddrvec[i].c_str(), stoi(portvec[i]));
+                m_backendvec.push_back(ibackend);
+            }
+
+            if (NULL != m_backendvec[i])
+            {
+                if (Rtu == m_backendvec[i]->type)
+                {
+                    RtuBackend *rtuP = (RtuBackend*)m_backendvec[i];
+                    strcpy(rtuP->devName, namevec[i].c_str());
+                    // modbus_t *ctx = m_backendvec[i]->createCtxt(m_backendvec[i]);
+                }
+                else if (Tcp == m_backendvec[i]->type) {
+                    TcpBackend *tcpP = (TcpBackend*)m_backendvec[i];
+                    strcpy(tcpP->ip, ipaddrvec[i].c_str());
+                }
             }
         }
+        sleep(10);
     }
+    
 
 }
 
@@ -106,6 +111,9 @@ int modbus_handler::modbus_handler_connect()
     // vector<string> param2vec = m_dbhelper->getsqlresult();
     while(1)
     {
+        string sqlcmd = "select param2 from port where protocol=0;";
+        m_dbhelper->sql_exec_with_return(sqlcmd);
+        vector<string> param2vec = m_dbhelper->getsqlresult();
         for (int i = 0; i < m_backendvec.size(); i++)
         {
             if (m_bConnected[i] == true)
@@ -114,6 +122,14 @@ int modbus_handler::modbus_handler_connect()
                 continue;
             }
             modbus_t *ctx = m_backendvec[i]->createCtxt(m_backendvec[i]);
+            if (param2vec[i].empty())
+            {
+                modbus_set_slave(ctx, stoi(param2vec[i]));
+            }
+            else
+            {
+                modbus_set_slave(ctx, 1);
+            }
             if (modbus_connect(ctx) == -1)
             {
                 fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
@@ -144,6 +160,7 @@ int modbus_handler::modbus_data_process()
     {
         m_fTypevec.push_back((FuncType)stoi(m_dbhelper->getsqlresult()[i]));
     }
+    // param2获取读取的地址
     sqlcmd = "select param2 from port where protocol=0;";
     m_dbhelper->sql_exec_multicol_return(sqlcmd);
     vector<string> param2vec = m_dbhelper->getsqlresult();
@@ -298,9 +315,10 @@ int modbus_handler::modbus_data_process()
         }
         sqlcmd = "select id from port where protocol=0;";
         m_dbhelper->sql_exec_multicol_return(sqlcmd);
-        if (!m_data_map.empty())
+        if (m_data_map.empty())
         {
-            printf("error:m_data_map is empty\n");
+            printf("m_data_map is empty\n");
+            sleep(5);
             continue;
         }
         string jsonstr = m_mdb2mqtt.getmqttstr(m_dbhelper->getsqlresult()[0], m_data_map);
@@ -309,6 +327,12 @@ int modbus_handler::modbus_data_process()
         sleep(5);
     }
     
+}
+
+static void* myinit(void *handler)
+{
+    modbus_handler* myhandler = (modbus_handler*)handler;
+    myhandler->modbus_handler_init();
 }
 
 static void* myconnect(void *handler)
@@ -325,8 +349,9 @@ static void* myprocess(void *handler)
 
 int modbus_handler::modbus_start()
 {
-    pthread_t pid1, pid2;
-    int ret = pthread_create(&pid1, NULL, myconnect, this);
+    pthread_t initpid, pid1, pid2;
+    int ret = pthread_create(&initpid, NULL, myinit, this);
+    ret = pthread_create(&pid1, NULL, myconnect, this);
     if (ret < 0)
     {
         printf("Create connect pthread error\n");
@@ -347,8 +372,8 @@ int modbus_handler::modbus_start()
 
 int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int startaddr, uint16_t *dest)
 {
-    string sql = "select param2 from port where protocol=0";
-    m_dbhelper->sql_exec_multicol_return(sql);
+    string sql = "select id from port where protocol = 0;";
+    m_dbhelper->sql_exec_with_return(sql);
     if (m_dbhelper->getsqlresult().size() <= sqlresid)
     {
         printf("sqlresid is over result size\n");
@@ -356,71 +381,118 @@ int modbus_handler::modbus_read_holdingdata(modbus_t* ctx, int sqlresid, int sta
     }
     if (m_dbhelper->getsqlresult()[sqlresid].empty())
     {
-        printf("param2 is empty\n");
-        return 0;
-    }
-    sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
-    m_dbhelper->sql_exec_with_return(sql);
-    int offset = stoi(m_dbhelper->getsqlresult()[0]);
-    int ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
-    if (ret != offset)
-    {
-        printf("read number not right\n");
+        printf("port id is empty\n");
         return -1;
     }
-    float result = modbus_get_float(dest);
-    m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
-    startaddr += offset;
+    sql = "select id from node where portid=" + m_dbhelper->getsqlresult()[sqlresid] + ";";
+    m_dbhelper->sql_exec_with_return(sql);
+    if (m_dbhelper->getsqlresult().empty())
+    {
+        printf("port id not found in node table\n");
+        return -1;
+    }
+    sql = "select propertyid from nodeperperty where nodeid=" + m_dbhelper->getsqlresult()[sqlresid] + ";";
+    m_dbhelper->sql_exec_with_return(sql);
+    if (m_dbhelper->getsqlresult().empty())
+    {
+        printf("no propertyid found in node table\n");
+        return -1;
+    }
+    std::vector<std::string> propertyidvec = m_dbhelper->getsqlresult();
+    sql = "select offset from propertyid where nodeid=" + propertyidvec[sqlresid] + ";";
+    m_dbhelper->sql_exec_with_return(sql);
+    std::vector<std::string> offsetvec = m_dbhelper->getsqlresult();
+    sql = "select name from propertyid where nodeid=" + propertyidvec[sqlresid] + ";";
+    m_dbhelper->sql_exec_with_return(sql);
+    std::vector<std::string> namevec = m_dbhelper->getsqlresult();
+    int ret = -1;
+    for (int i = 0; i < m_dbhelper->getsqlresult().size(); i++)
+    {
+        ret = modbus_read_input_registers(ctx, stoi(offsetvec[i]), 2, dest);
+        float result = modbus_get_float(dest);
+        m_data_map[namevec[i]] = result;
+        startaddr =+ 2;
+    }
 
-    sql = "select param3 from port where protocol=0";
-    m_dbhelper->sql_exec_multicol_return(sql);
-    if (m_dbhelper->getsqlresult().size() <= sqlresid)
-    {
-        printf("sqlresid is over result size\n");
-        return startaddr;
-    }
-    if (m_dbhelper->getsqlresult()[sqlresid].empty())
-    {
-        printf("param3 is empty\n");
-        return 0;
-    }
-    sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
-    m_dbhelper->sql_exec_with_return(sql);
-    offset = stoi(m_dbhelper->getsqlresult()[0]);
-    ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
-    if (ret != offset)
-    {
-        printf("read number not right\n");
-        return -1;
-    }
-    result = modbus_get_float(dest);
-    m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
-    startaddr += offset;
+    // string sql = "select param2 from port where protocol=0";
+    // m_dbhelper->sql_exec_multicol_return(sql);
+    // if (m_dbhelper->getsqlresult().size() <= sqlresid)
+    // {
+    //     printf("sqlresid is over result size\n");
+    //     return -1;
+    // }
+    // if (m_dbhelper->getsqlresult()[sqlresid].empty())
+    // {
+    //     printf("param2 is empty\n");
+    //     return 0;
+    // }
+    // sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
+    // m_dbhelper->sql_exec_with_return(sql);
+    // if (m_dbhelper->getsqlresult().empty())
+    // {
+    //     printf("error:no offset found in the db\n");
+    //     return -1;
+    // }
+    // int offset = stoi(m_dbhelper->getsqlresult()[0]);
+    // int ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
+    // if (ret != offset)
+    // {
+    //     printf("read number not right\n");
+    //     return -1;
+    // }
+    // float result = modbus_get_float(dest);
+    // m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
+    // startaddr += offset;
 
-    sql = "select param4 from port where protocol=0";
-    m_dbhelper->sql_exec_multicol_return(sql);
-    if (m_dbhelper->getsqlresult().size() <= sqlresid)
-    {
-        printf("sqlresid is over result size\n");
-        return startaddr;
-    }
-    if (m_dbhelper->getsqlresult()[sqlresid].empty())
-    {
-        printf("param4 is empty\n");
-        return 0;
-    }
-    sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
-    m_dbhelper->sql_exec_with_return(sql);
-    offset = stoi(m_dbhelper->getsqlresult()[0]);
-    ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
-    if (ret != offset)
-    {
-        printf("read number not right\n");
-        return -1;
-    }
-    result = modbus_get_float(dest);
-    m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
-    startaddr += offset;
+    // sql = "select param3 from port where protocol=0";
+    // m_dbhelper->sql_exec_multicol_return(sql);
+    // if (m_dbhelper->getsqlresult().size() <= sqlresid)
+    // {
+    //     printf("sqlresid is over result size\n");
+    //     return startaddr;
+    // }
+    // if (m_dbhelper->getsqlresult()[sqlresid].empty())
+    // {
+    //     printf("param3 is empty\n");
+    //     return 0;
+    // }
+    // sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
+    // m_dbhelper->sql_exec_with_return(sql);
+    // offset = stoi(m_dbhelper->getsqlresult()[0]);
+    // ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
+    // if (ret != offset)
+    // {
+    //     printf("read number not right\n");
+    //     return -1;
+    // }
+    // result = modbus_get_float(dest);
+    // m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
+    // startaddr += offset;
+
+    // sql = "select param4 from port where protocol=0";
+    // m_dbhelper->sql_exec_multicol_return(sql);
+    // if (m_dbhelper->getsqlresult().size() <= sqlresid)
+    // {
+    //     printf("sqlresid is over result size\n");
+    //     return startaddr;
+    // }
+    // if (m_dbhelper->getsqlresult()[sqlresid].empty())
+    // {
+    //     printf("param4 is empty\n");
+    //     return 0;
+    // }
+    // sql = "select offset from property where name='" + m_dbhelper->getsqlresult()[sqlresid] + "';";
+    // m_dbhelper->sql_exec_with_return(sql);
+    // offset = stoi(m_dbhelper->getsqlresult()[0]);
+    // ret = modbus_read_input_registers(ctx, startaddr, offset, dest);
+    // if (ret != offset)
+    // {
+    //     printf("read number not right\n");
+    //     return -1;
+    // }
+    // result = modbus_get_float(dest);
+    // m_data_map[m_dbhelper->getsqlresult()[sqlresid]] = result;
+    // startaddr += offset;
 
     return startaddr;
 }

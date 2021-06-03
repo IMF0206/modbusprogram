@@ -85,7 +85,7 @@ int mqtt_pub::mqtt_send(std::string jsonstr, int type)
     // m_dbhelper->sql_exec_with_return("select secmode from edgedev;");
     // std::string secmode = m_dbhelper->getsqlresult()[0];
     char mqttaddr[128] = {0};
-    std::string secmode = "1";
+    std::string secmode = "0";
     if (secmode.compare("1") == 0)
     {
         if (deviceip.size() == 0)
