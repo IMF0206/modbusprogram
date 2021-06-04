@@ -101,11 +101,11 @@ void mqtt_json::create_json_add_device()
     }
     cJSON* nodearr = cJSON_CreateArray();
     std::vector<std::string> statusvec = dbhelper.getsqlresult();
-    sqlstr = "select nodeid from node;";
-    dbhelper.sql_exec_with_return(sqlstr);
+    sqlstr = "select deviceid from node;";
+    dbhelper.sql_exec_multicol_return(sqlstr);
     std::vector<std::string> nodeidvec = dbhelper.getsqlresult();
     sqlstr = "select name from node;";
-    dbhelper.sql_exec_with_return(sqlstr);
+    dbhelper.sql_exec_multicol_return(sqlstr);
     std::vector<std::string> namevec = dbhelper.getsqlresult();
     for (int i = 0; i < statusvec.size(); i++)
     {
@@ -117,6 +117,7 @@ void mqtt_json::create_json_add_device()
             continue;
         }
         cJSON* nodeitem = cJSON_CreateObject();
+        printf("===========%s===========\n", nodeidvec[i].c_str());
         cJSON_AddStringToObject(nodeitem, "nodeId", nodeidvec[i].c_str());
         cJSON_AddStringToObject(nodeitem, "name", namevec[i].c_str());
         cJSON_AddStringToObject(nodeitem, "description", "test");
@@ -603,7 +604,7 @@ void mqtt_json::create_json_plat_adddev()
     cJSON_AddNumberToObject(root, "mid", PLAT_ADD_DEV);
     std::string sqlstr = "select status from node;";
     db_helper dbhelper(DB_FILE_PATH);
-    dbhelper.sql_exec_with_return(sqlstr);
+    dbhelper.sql_exec_multicol_return(sqlstr);
     if (dbhelper.getsqlresult().size() < 1)
     {
         printf("iot.db does not have devices;");
@@ -611,14 +612,14 @@ void mqtt_json::create_json_plat_adddev()
     }
     cJSON* nodearr = cJSON_CreateArray();
     std::vector<std::string> statusvec = dbhelper.getsqlresult();
-    sqlstr = "select nodeid from node;";
-    dbhelper.sql_exec_with_return(sqlstr);
+    sqlstr = "select deviceid from node;";
+    dbhelper.sql_exec_multicol_return(sqlstr);
     std::vector<std::string> nodeidvec = dbhelper.getsqlresult();
     sqlstr = "select name from node;";
-    dbhelper.sql_exec_with_return(sqlstr);
+    dbhelper.sql_exec_multicol_return(sqlstr);
     std::vector<std::string> namevec = dbhelper.getsqlresult();
     sqlstr = "select type from node;";
-    dbhelper.sql_exec_with_return(sqlstr);
+    dbhelper.sql_exec_multicol_return(sqlstr);
     std::vector<std::string> typevec = dbhelper.getsqlresult();
     for (int i = 0; i < statusvec.size(); i++)
     {
@@ -658,7 +659,7 @@ void mqtt_json::create_json_plat_update(int status)
     cJSON_AddNumberToObject(root, "mid", PLAT_UPDATE_DEV);
     std::string sqlstr = "select status from node;";
     db_helper dbhelper(DB_FILE_PATH);
-    dbhelper.sql_exec_with_return(sqlstr);
+    dbhelper.sql_exec_multicol_return(sqlstr);
     if (dbhelper.getsqlresult().size() < 1)
     {
         printf("iot.db does not have devices;");
@@ -667,7 +668,7 @@ void mqtt_json::create_json_plat_update(int status)
     cJSON* nodearr = cJSON_CreateArray();
     std::vector<std::string> statusvec = dbhelper.getsqlresult();
     sqlstr = "select deviceid from node;";
-    dbhelper.sql_exec_with_return(sqlstr);
+    dbhelper.sql_exec_multicol_return(sqlstr);
     std::vector<std::string> deviceidvec = dbhelper.getsqlresult();
     for (int i = 0; i < statusvec.size(); i++)
     {

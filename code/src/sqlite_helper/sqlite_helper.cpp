@@ -48,6 +48,7 @@ db_helper::db_helper(std::string s_path)
 {
     m_path = s_path;
     m_db = NULL;
+    db_open();
 }
 
 db_helper::~db_helper()
@@ -63,7 +64,7 @@ db_helper::~db_helper()
 
 int db_helper::sql_exec_with_return(std::string s_sql)
 {
-    db_open();
+    // db_open();
     m_resultvec.clear();
     if (m_db == NULL)
     {
@@ -73,13 +74,13 @@ int db_helper::sql_exec_with_return(std::string s_sql)
     int rc = 0;
     rc = db_exec(s_sql.c_str());
 
-    db_close();
+    // db_close();
 }
 
 int db_helper::sql_exec_multicol_return(std::string s_sql)
 {
-    db_open();
-        m_resultvec.clear();
+    // db_open();
+    m_resultvec.clear();
     if (m_db == NULL)
     {
         printf("m_db is NULL.\n");
@@ -88,7 +89,7 @@ int db_helper::sql_exec_multicol_return(std::string s_sql)
     int rc = 0;
     rc = db_multicol_exec(s_sql.c_str());
 
-    db_close();
+    // db_close();
 }
 
 std::vector<std::string> db_helper::getsqlresult()
