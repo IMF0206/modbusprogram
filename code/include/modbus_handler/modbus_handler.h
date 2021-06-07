@@ -62,6 +62,9 @@ private:
     mqtt_pub *m_mqttpub;
     mqtt_plat *m_mqttplat;
     std::map<std::string, float> m_data_map;
+    std::map<int, std::string> m_nodeid_portaddr;
+    // 校验位，用于check接入设备是否有变更
+    int m_checknum;
     modbus2mqtt m_mdb2mqtt;
 };
 
