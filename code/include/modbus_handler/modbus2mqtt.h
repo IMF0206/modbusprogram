@@ -14,7 +14,7 @@ class modbus2mqtt
 public:
     modbus2mqtt();
     ~modbus2mqtt();
-    std::string getmqttstr(std::string portid, std::map<std::string, float>datamap);
+    std::string getmqttstr(std::string deviceid, std::map<std::string, float>datamap);
 
 private:
     mqtt_json* m_mqttjson;

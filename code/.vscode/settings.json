@@ -34,6 +34,7 @@
         "numeric": "cpp",
         "cinttypes": "cpp",
         "cjson.h": "c",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "string": "cpp"
     }
 }

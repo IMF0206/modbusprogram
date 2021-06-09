@@ -24,16 +24,17 @@ modbus2mqtt::~modbus2mqtt()
     }
 }
 
-std::string modbus2mqtt::getmqttstr(string portid, map<string, float>datamap)
+std::string modbus2mqtt::getmqttstr(string deviceid, map<string, float>datamap)
 {
-    string sql = "select deviceid from node where portid=" + portid + ";";
-    m_dbhelper->sql_exec_with_return(sql);
-    if (m_dbhelper->getsqlresult().empty())
-    {
-        printf("%s\n", sql.c_str());
-        printf("No deviceid get in the table\n");
-        return "{}";
-    }
-    m_mqttjson->create_json_data_upload_map(m_dbhelper->getsqlresult()[0], datamap);
+    // string sql = "select deviceid from node where id=" + nodeid + ";";
+    // m_dbhelper->sql_exec_with_return(sql);
+    // if (m_dbhelper->getsqlresult().empty())
+    // {
+    //     printf("%s\n", sql.c_str());
+    //     printf("No deviceid get in the table\n");
+    //     return "{}";
+    // }
+    // m_mqttjson->create_json_data_upload_map(m_dbhelper->getsqlresult()[0], datamap);
+    m_mqttjson->create_json_data_upload_map(deviceid, datamap);
     return m_mqttjson->get_jsonstr();
 }
